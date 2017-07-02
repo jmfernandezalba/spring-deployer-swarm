@@ -1,5 +1,10 @@
 package org.springframework.cloud.deployer.spi.swarm;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.messages.ServiceCreateResponse;
@@ -14,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
@@ -24,11 +30,6 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static com.spotify.docker.client.VersionCompare.compareVersion;
 import static org.hamcrest.Matchers.is;
@@ -77,7 +78,7 @@ public class SwarmAppDeployerTest {
             try {
                 defaultDockerClient.removeService(service.id());
             } catch (InterruptedException | DockerException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
 
         });

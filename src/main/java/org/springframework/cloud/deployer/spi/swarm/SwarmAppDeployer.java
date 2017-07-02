@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.exceptions.DockerException;
@@ -110,7 +112,7 @@ public class SwarmAppDeployer extends AbstractSwarmDeployer implements AppDeploy
                 }
             }
             catch (DockerException|InterruptedException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage());
             }
 
                 //Single container deployment
@@ -143,7 +145,7 @@ public class SwarmAppDeployer extends AbstractSwarmDeployer implements AppDeploy
                 }
             }
             catch (DockerException|InterruptedException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage());
             }
 
             return appId;
@@ -232,7 +234,7 @@ public class SwarmAppDeployer extends AbstractSwarmDeployer implements AppDeploy
             try {
                 createNetwork(networkName);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
 
         }
@@ -257,6 +259,7 @@ public class SwarmAppDeployer extends AbstractSwarmDeployer implements AppDeploy
         final TaskSpec taskSpec =  TaskSpec.builder()
                 .containerSpec(ContainerSpec.builder()
                         .image(image)
+                        .env(request.getDefinition().getProperties().entrySet().stream().map(Objects::toString).collect(Collectors.toList()))
                         .build())
                 .restartPolicy(RestartPolicy.builder()
                         .condition(RestartPolicy.RESTART_POLICY_NONE)
@@ -303,7 +306,7 @@ public class SwarmAppDeployer extends AbstractSwarmDeployer implements AppDeploy
             taskList = client.listTasks(Task.find().serviceName(appId).build());
         }
         catch (DockerException | InterruptedException e) {
-            e.printStackTrace();
+            logger.warn(e.getMessage());
         }
         if (logger.isDebugEnabled()) {
             logger.debug("Building AppStatus for app: {}", appId);
