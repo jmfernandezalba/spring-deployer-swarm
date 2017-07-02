@@ -1,15 +1,16 @@
 package org.springframework.cloud.deployer.spi.swarm;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.spotify.docker.client.messages.swarm.ContainerStatus;
 import com.spotify.docker.client.messages.swarm.Task;
 import com.spotify.docker.client.messages.swarm.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by joriscaloud on 13/10/16.
@@ -89,7 +90,6 @@ public class SwarmAppInstanceStatus implements AppInstanceStatus {
             case TaskStatus.TASK_STATE_RUNNING:
                 return DeploymentState.deployed;
 
-
             case TaskStatus.TASK_STATE_ALLOCATED:
                 return DeploymentState.deployed;
 
@@ -105,7 +105,7 @@ public class SwarmAppInstanceStatus implements AppInstanceStatus {
             result.put("container_id", containerStatus.containerId());
 
         }
-;
+
         if (taskStatus != null && containerStatus.exitCode() != null) {
             result.put("container_last_termination_exit_code", "" + containerStatus.exitCode());
         }

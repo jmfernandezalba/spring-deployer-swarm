@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static com.spotify.docker.client.VersionCompare.compareVersion;
 import static org.hamcrest.Matchers.is;
@@ -128,6 +127,7 @@ public class SwarmAppDeployerTest {
         String secondDeploymentId =  swarmAppDeployer.deploy(secondRequest);
         launchTimeout();
         Task secondTask = (Task) swarmAppDeployer.testInformations.get("Task");
+        launchTimeout();
         AppStatus secondAppStatus = swarmAppDeployer.status(secondTask.id(), secondTask);
         launchTimeout();
         assertThat(secondAppStatus.getState(), eventually(Matchers.<DeploymentState>anyOf(is(DeploymentState.deployed), is(DeploymentState.deploying)), timeout.maxAttempts, timeout.pause));

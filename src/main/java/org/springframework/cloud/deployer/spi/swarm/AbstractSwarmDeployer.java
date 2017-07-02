@@ -1,15 +1,16 @@
 package org.springframework.cloud.deployer.spi.swarm;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.spotify.docker.client.messages.swarm.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by joriscaloud on 12/10/16.

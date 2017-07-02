@@ -1,7 +1,10 @@
 package org.springframework.cloud.deployer.spi.swarm;
 
 import com.spotify.docker.client.DefaultDockerClient;
+import com.spotify.docker.client.DockerCertificates;
 import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.exceptions.DockerCertificateException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -24,8 +27,9 @@ public class SwarmAutoConfiguration {
     private SwarmDeployerProperties properties;
 
     @Bean
-    public DockerClient defaultDockerClient() {
-        return new DefaultDockerClient(properties.getURI());
+    public DockerClient defaultDockerClient() throws DockerCertificateException {
+        return new DefaultDockerClient(properties.getURI(), DockerCertificates.builder()
+        		.dockerCertPath(properties.getCertPath()).build().get());
     }
 
     @Bean

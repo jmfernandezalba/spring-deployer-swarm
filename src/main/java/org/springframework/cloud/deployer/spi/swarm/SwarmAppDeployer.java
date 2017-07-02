@@ -1,23 +1,33 @@
 package org.springframework.cloud.deployer.spi.swarm;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.exceptions.DockerException;
-import com.spotify.docker.client.messages.Ipam;
 import com.spotify.docker.client.messages.Network;
 import com.spotify.docker.client.messages.NetworkConfig;
 import com.spotify.docker.client.messages.NetworkCreation;
 import com.spotify.docker.client.messages.ServiceCreateResponse;
-import com.spotify.docker.client.messages.swarm.*;
+import com.spotify.docker.client.messages.swarm.ContainerSpec;
+import com.spotify.docker.client.messages.swarm.EndpointSpec;
+import com.spotify.docker.client.messages.swarm.NetworkAttachmentConfig;
+import com.spotify.docker.client.messages.swarm.PortConfig;
+import com.spotify.docker.client.messages.swarm.RestartPolicy;
+import com.spotify.docker.client.messages.swarm.Service;
+import com.spotify.docker.client.messages.swarm.ServiceMode;
+import com.spotify.docker.client.messages.swarm.ServiceSpec;
+import com.spotify.docker.client.messages.swarm.Task;
+import com.spotify.docker.client.messages.swarm.TaskSpec;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 
 /**
  * Created by joriscaloud on 12/10/16.
@@ -161,16 +171,16 @@ public class SwarmAppDeployer extends AbstractSwarmDeployer implements AppDeploy
         logger.debug("Undeploying app: {}", appId);
         try {
             List<Service> services =
-                    client.listServices(Service.find().withServiceName(appId).build());
+                    client.listServices(Service.find().serviceName(appId).build());
             for (Service rc : services) {
                 logger.debug("Updating replicas number for : {}", rc.id());
                 client.updateService(rc.id(), rc.version().index(), ServiceSpec.builder()
-                        .withName(rc.spec().name())
-                        .withTaskTemplate(rc.spec().taskTemplate())
-                        .withServiceMode(ServiceMode.withReplicas(replicas))
-                        .withNetworks(NetworkAttachmentConfig.builder().withTarget(networkName).build())
-                        .withEndpointSpec(rc.spec().endpointSpec())
-                        .withUpdateConfig(rc.spec().updateConfig())
+                        .name(rc.spec().name())
+                        .taskTemplate(rc.spec().taskTemplate())
+                        .mode(ServiceMode.withReplicas(replicas))
+                        .networks(NetworkAttachmentConfig.builder().target(networkName).build())
+                        .endpointSpec(rc.spec().endpointSpec())
+                        .updateConfig(rc.spec().updateConfig())
                         .build());
                 if (replicas == 0) {
                     client.removeService(rc.id());
@@ -188,15 +198,15 @@ public class SwarmAppDeployer extends AbstractSwarmDeployer implements AppDeploy
         logger.debug("Undeploying app: {}", appId);
         try {
             List<Service> services =
-                    client.listServices(Service.find().withServiceName(appId).build());
+                    client.listServices(Service.find().serviceName(appId).build());
             for (Service rc : services) {
                 logger.debug("Updating replicas number for : {}", rc.id());
                 client.updateService(rc.id(), rc.version().index(), ServiceSpec.builder()
-                        .withName(rc.spec().name())
-                        .withTaskTemplate(rc.spec().taskTemplate())
-                        .withServiceMode(ServiceMode.withReplicas(replicas))
-                        .withEndpointSpec(rc.spec().endpointSpec())
-                        .withUpdateConfig(rc.spec().updateConfig())
+                        .name(rc.spec().name())
+                        .taskTemplate(rc.spec().taskTemplate())
+                        .mode(ServiceMode.withReplicas(replicas))
+                        .endpointSpec(rc.spec().endpointSpec())
+                        .updateConfig(rc.spec().updateConfig())
                         .build());
                 if (replicas == 0) {
                     client.removeService(rc.id());
@@ -232,7 +242,6 @@ public class SwarmAppDeployer extends AbstractSwarmDeployer implements AppDeploy
     private void createNetwork(String networkName) throws Exception {
         final NetworkCreation networkCreation = client
                 .createNetwork(NetworkConfig.builder().driver("overlay")
-                        .ipam(Ipam.builder().driver("default").build())
                         .name(networkName).build());
         this.testInformations.put("Network", networkCreation);
     }
@@ -246,11 +255,11 @@ public class SwarmAppDeployer extends AbstractSwarmDeployer implements AppDeploy
             throw new IllegalArgumentException("Unable to get URI for " + request.getResource(), e);
         }
         final TaskSpec taskSpec =  TaskSpec.builder()
-                .withContainerSpec(ContainerSpec.builder()
-                        .withImage(image)
+                .containerSpec(ContainerSpec.builder()
+                        .image(image)
                         .build())
-                .withRestartPolicy(RestartPolicy.builder()
-                        .withCondition(RestartPolicy.RESTART_POLICY_NONE)
+                .restartPolicy(RestartPolicy.builder()
+                        .condition(RestartPolicy.RESTART_POLICY_NONE)
                         .build())
                 .build();
         return taskSpec;
@@ -265,20 +274,20 @@ public class SwarmAppDeployer extends AbstractSwarmDeployer implements AppDeploy
         ServiceSpec service = null;
         if (networkName!=null) {
             service = ServiceSpec.builder()
-                    .withLabels(idMap)
-                    .withName(serviceName)
-                    .withTaskTemplate(taskSpec)
-                    .withServiceMode(serviceMode)
-                    .withEndpointSpec(addEndPointSpec(externalPort))
-                    .withNetworks((NetworkAttachmentConfig.builder().withTarget(networkName).build()))
+                    .labels(idMap)
+                    .name(serviceName)
+                    .taskTemplate(taskSpec)
+                    .mode(serviceMode)
+                    .endpointSpec(addEndPointSpec(externalPort))
+                    .networks((NetworkAttachmentConfig.builder().target(networkName).build()))
                     .build();
         }
         else service = ServiceSpec.builder()
-                .withLabels(idMap)
-                .withName(serviceName)
-                .withTaskTemplate(taskSpec)
-                .withServiceMode(serviceMode)
-                .withEndpointSpec(addEndPointSpec(externalPort))
+                .labels(idMap)
+                .name(serviceName)
+                .taskTemplate(taskSpec)
+                .mode(serviceMode)
+                .endpointSpec(addEndPointSpec(externalPort))
                 .build();
 
         return service;
@@ -291,7 +300,7 @@ public class SwarmAppDeployer extends AbstractSwarmDeployer implements AppDeploy
         List<Task> taskList = null;
         AppStatus status;
         try {
-            taskList = client.listTasks(Task.find().withServiceName(appId).build());
+            taskList = client.listTasks(Task.find().serviceName(appId).build());
         }
         catch (DockerException | InterruptedException e) {
             e.printStackTrace();
@@ -331,23 +340,28 @@ public class SwarmAppDeployer extends AbstractSwarmDeployer implements AppDeploy
     
     private EndpointSpec addEndPointSpec(int port) {
         return EndpointSpec.builder()
-                .withPorts(new PortConfig[]{createSwarmContainerPortConfig(port)})
+                .ports(new PortConfig[]{createSwarmContainerPortConfig(port)})
                 .build();
 
     }
 
     
     private PortConfig createSwarmContainerPortConfig(Integer port) {
-        PortConfig portConfig = new PortConfig();
+        PortConfig portConfig = PortConfig.builder().build();
         if (port != null) {
             portConfig = PortConfig.builder()
-                    .withName("endpoint")
-                    .withPublishedPort(port)
-                    .withTargetPort(port)
-                    .withProtocol("http")
+                    .name("endpoint")
+                    .publishedPort(port)
+                    .targetPort(port)
+                    .protocol("http")
                     .build();
         }
         return portConfig;
     }
-}
 
+    @Override
+    public RuntimeEnvironmentInfo environmentInfo() {
+    	// TODO Auto-generated method stub
+        return null;
+    }
+}

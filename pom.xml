@@ -10,12 +10,12 @@
     <parent>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-deployer-parent</artifactId>
-        <version>1.0.2.RELEASE</version>
+        <version>1.2.1.RELEASE</version>
     </parent>
 
     <properties>
         <java.version>1.8</java.version>
-        <spring-cloud-deployer-spi.version>1.0.2.RELEASE</spring-cloud-deployer-spi.version>
+        <spring-cloud-deployer-spi.version>1.2.1.RELEASE</spring-cloud-deployer-spi.version>
     </properties>
 
     <distributionManagement>
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>docker-client</artifactId>
-            <version>6.2.6-SNAPSHOT</version>
+            <version>8.7.3</version>
         </dependency>
         <dependency>
             <groupId>org.zeromq</groupId>
@@ -65,17 +65,8 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-stream-test-support-internal</artifactId>
+            <version>1.2.2.RELEASE</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-deployer-local</artifactId>
-            <version>1.1.2.BUILD-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zeromq</groupId>
-            <artifactId>jeromq</artifactId>
-            <version>0.3.5</version>
         </dependency>
     </dependencies>
 </project>
